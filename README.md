@@ -55,3 +55,10 @@ $ gsutil mb gs://scripts-bucket-20202/
 $ gsutils cp scripts/startup gs://scripts-bucket-20202/
 $ gcloud compute instances create reddit-app --boot-disk-size=10GB --image-family ubuntu-1604-lts --image-project=ubuntu-os-cloud --machine-type=g1-small --tags puma-server --restart-on-failure --zone=europe-west4-a --scopes storage-ro --metadata startup-script-url=gs://scripts-bucket-20202/startup
 ```
+***
+## packer-basea
+1. Создан шаблон [ubuntu16.json](packer/ubuntu16.json) для создания образа виртуальной машины. Переменные определяются в файле [variables.json](packer/variables.json.example). Для провижининга написаны два bash-скрипта [install_ruby.sh](packer/scripts/install_ruby.sh) и [install_mongodb.sh](packer/scripts/install_mongodb.sh). Образ собрался и, как ожидалось, успешно стартовала виртуальная машина построенная на нем.
+
+2. Создан шаблон [immutable.json](packer/immutable.json). Этот шаблон отличается от предыдущего тем, что создается образ с уже запущенным приложением. При этом для веб-сервера **puma** готов systemd юнит-файл.
+
+3. Написан скрипт [create-reddit-vm.sh](config-scripts/create-reddit-vm.sh) для запуска виртуальной машины на основе созданного образа.

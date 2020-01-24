@@ -1,50 +1,49 @@
-terraform {
-  required_version = ">= 0.12.8"
-}
-
-provider "google" {
-  version = "3.0.0"
-  project = var.project
-  region  = var.region
-}
-
 resource "google_compute_instance" "app" {
-  count        = var.instance_count
-  name         = "reddit-app-${count.index}"
-  machine_type = "f1-micro"
+  name         = "reddit-app"
+  machine_type = var.machine_type
   zone         = var.zone
   tags         = ["reddit-app"]
   boot_disk {
     initialize_params {
-      image = var.disk_image
+      image = var.app_disk_image
     }
   }
 
   network_interface {
     network = "default"
-    access_config {}
+    access_config {
+      nat_ip = google_compute_address.app-ip.address
+    }
   }
 
   metadata = {
     ssh-keys = "appuser:${file(var.public_key_path)}"
   }
+}
+
+resource "null_resource" "app-provision" {
+  count = var.deploy ? 1 : 0
 
   connection {
     type        = "ssh"
-    host        = self.network_interface[0].access_config[0].nat_ip
+    host        = google_compute_address.app-ip.address
     user        = "appuser"
     agent       = false
     private_key = file(var.private_key_path)
   }
 
   provisioner "file" {
-    source      = "files/puma.service"
+    content     = templatefile("${path.module}/files/puma.service.tpl", { db_addr = var.db_addr })
     destination = "/tmp/puma.service"
   }
 
   provisioner "remote-exec" {
-    script = "files/deploy.sh"
+    script = "${path.module}/files/deploy.sh"
   }
+}
+
+resource "google_compute_address" "app-ip" {
+  name = "reddit-app-ip"
 }
 
 resource "google_compute_firewall" "firewall-puma" {
@@ -58,13 +57,4 @@ resource "google_compute_firewall" "firewall-puma" {
   priority      = "1000"
   source_ranges = ["0.0.0.0/0"]
   target_tags   = ["reddit-app"]
-}
-
-resource "google_compute_project_metadata_item" "default" {
-  key   = "ssh-keys"
-  value = <<-EOT
-    appuser1:${file(var.public_key_path)}
-    appuser2:${file(var.public_key_path)}
-    appuser3:${file(var.public_key_path)}
-  EOT
 }

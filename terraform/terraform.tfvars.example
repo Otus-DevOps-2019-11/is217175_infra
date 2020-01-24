@@ -1,11 +1,1 @@
-project          = "infra-264018"
-public_key_path  = "./gcp_appuser.pub"
-disk_image       = "reddit-base"
-private_key_path = "./gcp_appuser"
-zone             = "europe-west4-b"
-instance_count   = 2
-external_port    = 80
-app_named_port   = {
-  name = "reddit-http"
-  port = 9292
-}
+project = "infra-123456"

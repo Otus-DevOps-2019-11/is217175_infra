@@ -28,3 +28,8 @@ variable "deploy" {
   type        = bool
   description = "Enable provisioners"
 }
+
+variable "labels" {
+  type        = map
+  description = "Instance labels"
+}

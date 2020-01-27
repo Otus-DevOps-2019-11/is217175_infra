@@ -3,6 +3,7 @@ resource "google_compute_instance" "app" {
   machine_type = var.machine_type
   zone         = var.zone
   tags         = ["reddit-app"]
+  labels       = var.labels
   boot_disk {
     initialize_params {
       image = var.app_disk_image

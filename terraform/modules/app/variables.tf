@@ -33,3 +33,8 @@ variable "db_addr" {
   type        = string
   description = "Database IP address"
 }
+
+variable "labels" {
+  type        = map
+  description = "Instance labels"
+}

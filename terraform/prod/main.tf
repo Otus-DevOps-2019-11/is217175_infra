@@ -12,6 +12,7 @@ module "app" {
   app_disk_image   = var.app_disk_image
   deploy           = var.deploy
   db_addr          = module.db.db_addr
+  labels           = {"ansible_group": "app"}
 }
 
 module "db" {
@@ -21,6 +22,7 @@ module "db" {
   db_disk_image    = var.db_disk_image
   private_key_path = var.private_key_path
   deploy           = var.deploy
+  labels           = {"ansible_group": "db"}
 }
 
 module "vpc" {

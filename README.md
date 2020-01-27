@@ -94,3 +94,33 @@ $ gcloud compute instances create reddit-app --boot-disk-size=10GB --image-famil
 4. Отдельно создан файл *storage-bucket.tf* для создания хранилища.
     В конфигураций *prod* и *stage* был добавлен новый файл *backend.tf*. Теперь файл состояния terraform.tfstate хранится в созданном хранилище.
 5. В модули app и db добавлены провижинеры. Они запускаются в зависимости от переменной *deploy*. После разворачивания инфраструктуры приложение готово и соединение с базой установлено.
+---
+## ansible-1
+Для работы с динамическим *inventory* немоного изменил описание ифраструктуры *terraform* - в модулях *app* и *db* при создании ВМ добавляется метка (labels) *ansible_group* c названием группы (*app* или *db*). Таким образом, независимо от количества ВМ в проекте провижин осуществляется согласно назначенным меткам во всех группах.
+
+В настройках *ansible.cfg* прописан скрипт, формирующий динамеческий *inventory* - [inventory.py](ansible/inventory.py):
+```
+...
+inventory = inventory.py
+...
+```
+Результат:
+
+```sh
+$ ansible all -m ping
+34.90.1.218 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python"
+    },
+    "changed": false,
+    "ping": "pong"
+}
+
+34.90.215.146 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python"
+    },
+    "changed": false,
+    "ping": "pong"
+}
+```

@@ -22,8 +22,11 @@
     "provisioners": [
         {
             "type": "shell",
-            "script": "scripts/install_mongodb.sh",
-            "execute_command": "sudo {{ .Path }}"
+            "inline": ["sudo apt update && sudo apt install python-apt"]
+        },
+        {
+            "type": "ansible",
+            "playbook_file": "ansible/packer_db.yml"
         }
     ]
 }

@@ -96,9 +96,9 @@ $ gcloud compute instances create reddit-app --boot-disk-size=10GB --image-famil
 5. В модули app и db добавлены провижинеры. Они запускаются в зависимости от переменной *deploy*. После разворачивания инфраструктуры приложение готово и соединение с базой установлено.
 ---
 ## ansible-1
-Для работы с динамическим *inventory* немоного изменил описание ифраструктуры *terraform* - в модулях *app* и *db* при создании ВМ добавляется метка (labels) *ansible_group* c названием группы (*app* или *db*). Таким образом, независимо от количества ВМ в проекте провижин осуществляется согласно назначенным меткам во всех группах.
+Для работы с динамическим *inventory* немного изменил описание инфраструктуры *terraform* - в модулях *app* и *db* при создании ВМ добавляется метка (labels) *ansible_group* c названием группы (*app* или *db*). Таким образом, независимо от количества ВМ в проекте провижин осуществляется согласно назначенным меткам во всех группах.
 
-В настройках *ansible.cfg* прописан скрипт, формирующий динамеческий *inventory* - [inventory.py](ansible/inventory.py):
+В настройках *ansible.cfg* прописан скрипт, формирующий динамический *inventory* - [inventory.py](ansible/inventory.py):
 ```
 ...
 inventory = inventory.py
@@ -123,4 +123,45 @@ $ ansible all -m ping
     "changed": false,
     "ping": "pong"
 }
+```
+---
+## ansible-2
+1. Изменена конфигурация *packer* - провижин заменен на использование *ansible-плейбуков* [packer_app.yml](ansible/packer_app.yml) и [packer_db.yml](ansible/packer_db.yml).
+2. Финальная настройка базы и приложения так же выполняются с помощью *ansible-плейбуков* [app.yml](ansible/app.yml), [db.yml](ansible/db.yml) и [deploy.yml](ansible/deploy.yml), объедененных в один [site.yml](ansible/site.yml).
+3. *Динамический inventory* заменен на плагин *gcp_compute*. В настройках [ansible.cfg](ansible/ansible.cfg):
+```
+...
+inventory = inventory.gcp.yml
+enable_plugins = gcp_compute
+...
+```
+Плагин настраивается в файле [inventory.gcp.yml](ansible/inventoty.gcp.yml)
+```
+plugin: gcp_compute
+zones:
+  - europe-west4-b
+projects:
+  - infra-123456
+service_account_file: infra-123456-sa.json
+auth_kind: serviceaccount
+scopes:
+ - 'https://www.googleapis.com/auth/cloud-platform'
+ - 'https://www.googleapis.com/auth/compute.readonly'
+keyed_groups:
+  - key: labels.ansible_group
+    separator: ''
+hostnames:
+  - name
+compose:
+  ansible_host: networkInterfaces[0].accessConfigs[0].natIP
+```
+Для назначения хостов в группы использованы метки (метка *ansible_group*), определенные в предыдущем задании в конфигурации *terraform*.
+```
+$ ansible-inventory --graph
+@all:
+  |--@app:
+  |  |--reddit-app
+  |--@db:
+  |  |--reddit-db
+  |--@ungrouped:
 ```

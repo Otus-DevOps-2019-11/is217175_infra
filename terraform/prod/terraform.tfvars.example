@@ -10,4 +10,4 @@ app_named_port = {
   port = 9292
 }
 
-deploy = true
+deploy = false

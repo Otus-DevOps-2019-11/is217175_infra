@@ -1,0 +1,12 @@
+---
+- name: Install packages
+  hosts: all
+  become: true
+  tasks:
+    - name: Install ruby
+      apt:
+        name:
+          - ruby-full
+          - ruby-bundler
+          - build-essential
+        state: present

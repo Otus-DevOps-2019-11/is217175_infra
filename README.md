@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.com/Otus-DevOps-2019-11/is217175_infra.svg?branch=master)](https://travis-ci.com/Otus-DevOps-2019-11/is217175_infra)
 # is217175_infra
 is217175 Infra repository
 ***
@@ -185,3 +186,4 @@ $ ansible-inventory --graph
     ansible-vault encrypt environments/stage/credentials.yml
     ```
 6. В оба окружения добавил динамический inventory с помощью плагина *gcp_compute*.
+7. Обновил конфигурацию .travis.yml для прохождения дополнительных тестов.

@@ -40,7 +40,7 @@ jobs:
       - packer validate -var-file packer/variables.json.example packer/app.json
       - packer validate -var-file packer/variables.json.example packer/db.json
 
-  - name: Validate homework
+  - stage: Validate homework
     before_install:
     - curl https://raw.githubusercontent.com/express42/otus-homeworks/2019-11/run.sh | bash
 

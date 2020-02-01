@@ -52,7 +52,7 @@ resource "google_compute_firewall" "firewall-puma" {
   network = "default"
   allow {
     protocol = "tcp"
-    ports    = ["9292"]
+    ports    = ["9292", "80"]
   }
   direction     = "INGRESS"
   priority      = "1000"

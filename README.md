@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.com/Otus-DevOps-2019-11/is217175_infra.svg?branch=master)](https://travis-ci.com/Otus-DevOps-2019-11/is217175_infra)
 # is217175_infra
 is217175 Infra repository
 ***
@@ -165,3 +166,24 @@ $ ansible-inventory --graph
   |  |--reddit-db
   |--@ungrouped:
 ```
+---
+## ansible-3
+1. Созданы роли *app* и *db*. Плейбуки и файлы предыдущего задания использованы для создания ролей.
+2. Для использования нескольких окружений в директории *environments* созданы поддиректории для каждого из окружений (*prod* и *stage*). Переменные определены через *group_vars* для каждого из окружений отдельно.
+3. Плейбуки переписаны для использования ролей
+
+    Таким образом можно легко запускать наборы сценариев для разных окружений с разными переменными:
+    ```
+    ansible-playbook playbooks/site.yml -i environments/stage/inventory.gcp.yml
+    ```
+
+4. С помощью *ansible-galaxy* установил новую роль для установки и настройки *nginx*. Ссылка на роль в community-репозитории указана в файле requirements.yml:
+    ```
+    ansible-galaxy install -r environments/stage/requirements.yml
+    ```
+5. Новый сценарий, который добавляет новых пользователей на виртуальные машины, использует файл *credentials.yml*. В нем указаны имена и пароли новых пользователей. Такие чувствительные данные были зашифрованы *ansible-vault*:
+    ```
+    ansible-vault encrypt environments/stage/credentials.yml
+    ```
+6. В оба окружения добавил динамический inventory с помощью плагина *gcp_compute*.
+7. Обновил конфигурацию .travis.yml для прохождения дополнительных тестов.

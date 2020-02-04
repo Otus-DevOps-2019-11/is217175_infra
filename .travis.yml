@@ -1,53 +1,10 @@
 dist: trusty
 sudo: required
 language: bash
-
-jobs:
-  include:
-  - stage: Validate configuration
-    name: Ansible validation
-    install:
-      - pip install ansible ansible-lint --user
-    script:
-      - ansible-lint ansible/playbooks/*
-
-  - name: Terraform validation
-    before_install:
-      - curl -L "$(curl -Ls https://api.github.com/repos/terraform-linters/tflint/releases/latest | grep -o -E "https://.+?_linux_amd64.zip")" -o tflint.zip
-      - wget https://releases.hashicorp.com/terraform/0.12.20/terraform_0.12.20_linux_amd64.zip -O terraform.zip
-    install:
-      - unzip -d $HOME/.local/bin/ -o tflint.zip
-      - unzip -d $HOME/.local/bin/ -o terraform.zip
-    before_script:
-      - terraform init -backend=false terraform/
-      - terraform init -backend=false terraform/prod/
-      - terraform init -backend=false terraform/stage/
-    script:
-      - tflint --var-file terraform/terraform.tfvars.example terraform/
-      - tflint --var-file terraform/prod/terraform.tfvars.example terraform/prod/
-      - tflint --var-file terraform/stage/terraform.tfvars.example terraform/stage/
-      - terraform validate terraform/
-      - terraform validate terraform/prod/
-      - terraform validate terraform/stage/
-
-  - name: Packer validation
-    before_install:
-      - pip install ansible --user
-      - wget https://releases.hashicorp.com/packer/1.5.1/packer_1.5.1_linux_amd64.zip -O packer.zip
-    install:
-      - unzip -d $HOME/.local/bin/ -o packer.zip
-    script:
-      - packer validate -var-file packer/variables.json.example packer/app.json
-      - packer validate -var-file packer/variables.json.example packer/db.json
-
-  - stage: Validate homework
-    before_install:
-    - curl https://raw.githubusercontent.com/express42/otus-homeworks/2019-11/run.sh | bash
-
+before_install:
+- curl https://raw.githubusercontent.com/express42/otus-homeworks/2019-11/run.sh |
+  bash
 notifications:
   slack:
     rooms:
       secure: J9hzfsseVunzoTNCYQBcud1x81Tr0G227joeBY8iGK4VW3SDolIjnttEZ86yOtmZxXryQkk+ttzUcYZV9zQaVme1bIZBUiCBfXoQhCt/sigucBmuwtZpTGh7l/sn73+6uspP8qsLh2nQCxcoBwgTESWYAbvCiCvewBvf62/4vAHBtmWzHW46oYAMgAOiLmXwQ2rJeQPuWMmZasBZX35aNOH7Nq7vWozy32Xgt2zYzYZi2dGYZcuPre3AEgdf63M0cZEohvixC542mIWGtOhLX3dmg7OQFkaqE4VXow7Xx4dDP3tFRMvG7XkSouZTbocRSdt0GHPautM+Ylkia4zo6NDH7fP+XvzRqWbBeod7vdf+FORaGh0kHIKYXHR6gc84pn7aOOYN6dw4JdUDL9mFH4Fbp6rWoI7KKqcmM1Q2MQj4MV2D/WPwkH5fGhd6V613NZ7ceuGQPOXeXbW6DsADGhtP8ByuMvr+Papjk6zHvJHTVrQJAVjVkXKebbnwGEWnXTDySWY4RJ9AJ9fLIWXuyUUYSOFpo2BVdzcHfDvxJrf7kAxNRmEUTQ+v95gjDCb8jfbjB+CTd2hPLCyUvokIeF4HmUeIIwPR9UgGIiLz7fQe0JMiS2bjEYWbq3Dn4P8Sfl/bOcKu7v8GG5VEhKXnSTs+/icVQLJra4/giS906VU=
-branches:
-- master
-- ansible-3

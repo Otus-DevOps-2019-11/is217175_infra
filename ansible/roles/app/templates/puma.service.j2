@@ -5,9 +5,9 @@ Wants=mongodb.service
 
 [Service]
 Type=simple
-User=appuser
-EnvironmentFile=/home/appuser/db_config
-WorkingDirectory=/home/appuser/reddit/
+User={{ deploy_user }}
+EnvironmentFile=/home/{{ deploy_user }}/db_config
+WorkingDirectory=/home/{{ deploy_user }}/reddit/
 ExecStart=/usr/local/bin/puma
 ExecReload=/bin/kill -USR2 $MAINPID
 ExecStop=/bin/kill -INT $MAINPID
